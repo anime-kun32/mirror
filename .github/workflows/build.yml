@@ -1,0 +1,50 @@
+name: Mirror proxy-from-env from npm
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # run daily
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get latest version metadata
+        id: meta
+        run: |
+          curl -s https://registry.npmjs.org/proxy-from-env > metadata.json
+          VERSION=$(jq -r '.["dist-tags"].latest' metadata.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download npm tarball
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          curl -L -o package.tgz "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-${VERSION}.tgz"
+
+      - name: Extract package
+        run: |
+          rm -rf temp || true
+          mkdir temp
+          tar -xzf package.tgz -C temp
+          rm -rf proxy || true
+          mv temp/package proxy
+
+      - name: Copy to repo root
+        run: |
+          rm -rf package.json index.js README.md LICENSE || true
+          cp proxy/package.json .
+          cp proxy/index.js .
+          cp proxy/README.md .
+          cp proxy/LICENSE .
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update to proxy-from-env ${{ steps.meta.outputs.version }}"
+          git push
