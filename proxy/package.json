@@ -1,16 +1,18 @@
 {
   "name": "proxy-from-env",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Offers getProxyForUrl to get the proxy URL for a URL, respecting the *_PROXY (e.g. HTTP_PROXY) and NO_PROXY environment variables.",
   "main": "index.js",
+  "exports": "./index.js",
   "scripts": {
-    "lint": "eslint *.js",
-    "test": "mocha ./test.js --reporter spec",
-    "test-coverage": "istanbul cover ./node_modules/.bin/_mocha -- --reporter spec"
+    "lint": "eslint *.js *.mjs",
+    "test": "node --test ./test.js",
+    "test-coverage": "node --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info ./test.js",
+    "test-coverage-as-html": "npm run test-coverage && genhtml lcov.info -o coverage/"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rob--W/proxy-from-env.git"
+    "url": "git+https://github.com/Rob--W/proxy-from-env.git"
   },
   "keywords": [
     "proxy",
@@ -26,9 +28,8 @@
   },
   "homepage": "https://github.com/Rob--W/proxy-from-env#readme",
   "devDependencies": {
-    "coveralls": "^3.0.9",
-    "eslint": "^6.8.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^7.1.0"
-  }
+    "eslint": "^9.39.2"
+  },
+  "type": "module",
+  "sideEffects": false
 }
